@@ -4,6 +4,7 @@
     <modules>
       <module fileurl="file://$PROJECT_DIR$/YahooFinaceAndroidLib.iml" filepath="$PROJECT_DIR$/YahooFinaceAndroidLib.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/yahoofinacelib/yahoofinacelib.iml" filepath="$PROJECT_DIR$/yahoofinacelib/yahoofinacelib.iml" />
     </modules>
   </component>
 </project>
