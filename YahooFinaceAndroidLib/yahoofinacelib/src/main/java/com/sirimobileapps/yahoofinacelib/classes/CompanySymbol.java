@@ -12,7 +12,7 @@ public class CompanySymbol {
        public String exchDisp;
        public String typeDisp;
 
-    public CompanySymbol (     String symbol, String companyName,String exchange,String type,String exchDisp, String typeDisp )
+    public CompanySymbol (String symbol, String companyName,String exchange,String type,String exchDisp, String typeDisp )
     {
         this.symbol = symbol;
         this.companyName = companyName;

@@ -1,20 +1,24 @@
 package com.sirimobileapps.yahoofinacelib.utils;
 
-import android.nfc.Tag;
 import android.util.Log;
 
 import com.sirimobileapps.yahoofinacelib.classes.CompanySymbol;
 import com.sirimobileapps.yahoofinacelib.interfaces.OnCompanySymbolListener;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.json.JSONStringer;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.Reader;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+
 
 
 /**
@@ -26,6 +30,8 @@ public  class Utils {
 
     private static String DEBUG_TAG = "Utils";
 
+    private static String YAHOO_RESULT_STRING = "YAHOO.Finance.SymbolSuggest.ssCallback(";
+
 
 
     /**
@@ -33,7 +39,7 @@ public  class Utils {
      * @param symbol_query Pass the string with want to search.
      * @param listener     Listener to get the result of string searched.
      */
-    public static void  searchCompanySymbol(String symbol_query ,OnCompanySymbolListener listener)
+    public static void  searchCompanySymbol(String symbol_query , final OnCompanySymbolListener listener)
     {
         ArrayList<CompanySymbol> list = null;
 
@@ -44,13 +50,19 @@ public  class Utils {
                 @Override
                 public void run() {
                     try {
-                    Log.d(DEBUG_TAG, openUrl(symbol_url));
+                        if(listener !=null)
+                            listener.onResult(convertJsonStringToList(removeYahooDataFromJsonString(openUrl(symbol_url))));
+
+                    Log.d(DEBUG_TAG, " Got Symbols");
 
                 }
                 catch (Exception e)
                 {
+                    if(listener !=null)
+                        listener.onResult(null);
                     Log.d(DEBUG_TAG , "error came::"+e);
                 }
+
                 }
             });
 
@@ -74,7 +86,7 @@ public  class Utils {
         // web page content.
 
 
-        Log.d(DEBUG_TAG , "searchUrl::"+searchUrl);
+        Log.d(DEBUG_TAG, "searchUrl::" + searchUrl);
 
         try {
             URL url = new URL(searchUrl);
@@ -105,7 +117,7 @@ public  class Utils {
     }
 
 
-    public static String readIt(InputStream stream) throws IOException, UnsupportedEncodingException {
+    private static String readIt(InputStream stream) throws IOException, UnsupportedEncodingException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(stream,"UTF-8"));
         StringBuilder sb = new StringBuilder();
         String line = null;
@@ -116,6 +128,43 @@ public  class Utils {
         return sb.toString();
     }
 
-    
+    private static String removeYahooDataFromJsonString(String data)
+    {
+        int len = YAHOO_RESULT_STRING.length();
+        String result = "";
+        result = data.substring(len,data.length()-2);
+
+        Log.d(DEBUG_TAG, "result::" + result);
+        return result;
+    }
+
+
+   private static ArrayList convertJsonStringToList(String jsonString) throws JSONException
+   {
+
+
+       JSONObject jsonSymbolObject = new JSONObject(jsonString);
+
+       JSONArray jsonSymbolArray   = jsonSymbolObject.getJSONObject("ResultSet").getJSONArray("Result");
+
+       Log.d(DEBUG_TAG , "jsonSymbolArray::"+jsonSymbolArray);
+
+       int length = jsonSymbolArray.length();
+
+
+       ArrayList list = new ArrayList(length);
+
+       for(int i = 0 ; i < length ; i++)
+       {
+           JSONObject object = jsonSymbolArray.getJSONObject(i);
+           CompanySymbol symbol = new CompanySymbol(object.getString("symbol"),object.getString("name"),object.getString("exch"),object.getString("type"),object.getString("exchDisp"),object.getString("typeDisp"));
+           list.add(symbol);
+       }
+
+       return list;
+   }
+
+
+
 
 }
