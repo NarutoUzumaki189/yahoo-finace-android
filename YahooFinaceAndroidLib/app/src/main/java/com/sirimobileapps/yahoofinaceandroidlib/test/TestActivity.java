@@ -7,6 +7,10 @@ import android.os.Bundle;
 
 import android.os.Debug;
 import android.util.Log;
+import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.ListView;
 
 import com.sirimobileapps.yahoofinaceandroidlib.R;
 import com.sirimobileapps.yahoofinacelib.classes.CompanySymbol;
@@ -14,6 +18,7 @@ import com.sirimobileapps.yahoofinacelib.classes.Share;
 import com.sirimobileapps.yahoofinacelib.interfaces.OnCompanySymbolListener;
 import com.sirimobileapps.yahoofinacelib.interfaces.OnShareGetListener;
 import com.sirimobileapps.yahoofinacelib.utils.Utils;
+import com.sirimobileapps.yahoofinacelib.view.EditDropBox;
 
 import java.util.ArrayList;
 
@@ -24,7 +29,11 @@ public class TestActivity extends Activity {
 
      String TAG = "TestActivity";
 
+    String items[] = {"siva","phani","srikrishna"};
 
+    EditDropBox mEditDropBox = null;
+    Button mButton = null;
+    ListView mView = null;
 
     protected void onCreate(Bundle savedInstance)
     {
@@ -33,62 +42,24 @@ public class TestActivity extends Activity {
         Log.d(TAG, "oncreate");
 
         setContentView(R.layout.testlayout);
+        mEditDropBox = (EditDropBox)(findViewById(R.id.editText));
 
+        mView = (ListView)(findViewById(R.id.listView));
 
-       Utils.searchCompanySymbol("AXIS", new OnCompanySymbolListener() {
+        mButton = (Button)(findViewById(R.id.addButton));
+
+        mButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onResult(ArrayList<CompanySymbol> list) {
-                Log.d(TAG, "" + list);
-                getShareValueDetails(list);
+            public void onClick(View v) {
+              //  mEditDropBox.enableListView();
+                mView.setAdapter(new ArrayAdapter<String>(TestActivity.this,android.R.layout.simple_list_item_1,items));
+
             }
         });
 
-
-
-       
-
     }
 
 
-    private IntentService mService = new IntentService("Myservice") {
-        @Override
-        protected void onHandleIntent(Intent intent) {
 
-        }
-
-        public void printText(String msg)
-        {
-            Log.d(TAG," ");
-        }
-    };
-
-
-
-    private void getShareValueDetails(ArrayList<CompanySymbol> symbolList )
-    {
-        if(symbolList != null) {
-            String SymbolsString = "";
-            for (CompanySymbol symbol : symbolList) {
-                SymbolsString += symbol.symbol+",";
-            }
-
-            Utils.getShareDetails(SymbolsString, new OnShareGetListener() {
-                @Override
-                public void onGetShareDetails(ArrayList<Share> list) {
-                    if(list != null)
-                    {
-                        for(Share share : list)
-                        {
-                            Log.d(TAG,"company name "+share.name+" share price :"+share.price + " change :"+share.change);
-                        }
-                    }
-                }
-            });
-        }
-        else
-        {
-            Log.d(TAG , "SymbolList is null");
-        }
-    }
 
 }
