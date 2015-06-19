@@ -3,7 +3,11 @@ package com.sirimobileapps.yahoofinacelib.utils;
 import android.util.Log;
 
 import com.sirimobileapps.yahoofinacelib.classes.CompanySymbol;
+import com.sirimobileapps.yahoofinacelib.classes.News;
+import com.sirimobileapps.yahoofinacelib.classes.Share;
 import com.sirimobileapps.yahoofinacelib.interfaces.OnCompanySymbolListener;
+import com.sirimobileapps.yahoofinacelib.interfaces.OnGetNewsListener;
+import com.sirimobileapps.yahoofinacelib.interfaces.OnShareGetListener;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -32,11 +36,11 @@ public  class Utils {
 
     private static String YAHOO_RESULT_STRING = "YAHOO.Finance.SymbolSuggest.ssCallback(";
 
-
+    private static boolean enableLog = false;
 
     /**
      *
-     * @param symbol_query Pass the string with want to search.
+     * @param symbol_query Pass the string with want to search.Ex TTM, SBIN.NS , TTM,SBIN.NS , etc.
      * @param listener     Listener to get the result of string searched.
      */
     public static void  searchCompanySymbol(String symbol_query , final OnCompanySymbolListener listener)
@@ -51,16 +55,18 @@ public  class Utils {
                 public void run() {
                     try {
                         if(listener !=null)
-                            listener.onResult(convertJsonStringToList(removeYahooDataFromJsonString(openUrl(symbol_url))));
+                            listener.onResult(jsonToCompanySymbolList(removeYahooDataFromJsonString(openUrl(symbol_url))));
 
-                    Log.d(DEBUG_TAG, " Got Symbols");
+                    if(enableLog)
+                       Log.d(DEBUG_TAG, " Got Symbols");
 
                 }
                 catch (Exception e)
                 {
                     if(listener !=null)
                         listener.onResult(null);
-                    Log.d(DEBUG_TAG , "error came::"+e);
+                    if(enableLog)
+                       Log.e(DEBUG_TAG , "error came::"+e);
                 }
 
                 }
@@ -71,6 +77,7 @@ public  class Utils {
 
 
     }
+
 
     /**
      *
@@ -133,13 +140,13 @@ public  class Utils {
         int len = YAHOO_RESULT_STRING.length();
         String result = "";
         result = data.substring(len,data.length()-2);
-
-        Log.d(DEBUG_TAG, "result::" + result);
+        if(enableLog)
+           Log.d(DEBUG_TAG, "result::" + result);
         return result;
     }
 
 
-   private static ArrayList convertJsonStringToList(String jsonString) throws JSONException
+   private static ArrayList jsonToCompanySymbolList(String jsonString) throws JSONException
    {
 
 
@@ -166,5 +173,108 @@ public  class Utils {
 
 
 
+    private  static ArrayList jsonToShareList(String jsonString) throws JSONException
+    {
+        if(enableLog)
+           Log.d(DEBUG_TAG , "jsonToShareList::"+jsonString);
+
+        JSONObject jsonSymbolObject = new JSONObject(jsonString);
+
+        JSONArray jsonSymbolArray   = jsonSymbolObject.getJSONObject("list").getJSONArray("resources");
+        if(enableLog)
+           Log.d(DEBUG_TAG , "jsonSymbolArray::"+jsonSymbolArray);
+
+        int length = jsonSymbolArray.length();
+
+
+        ArrayList list = new ArrayList(length);
+
+        for(int i = 0 ; i < length ; i++)
+        {
+            JSONObject object = jsonSymbolArray.getJSONObject(i).getJSONObject("resource").getJSONObject("fields");
+            Share share = new Share(object.getString("change"),object.getString("chg_percent"),object.getString("day_high"),object.getString("day_low"),object.getString("name"),object.getString("price"),object.getString("volume"),object.getString("year_high"),object.getString("year_low"));
+            list.add(share);
+        }
+
+        return list;
+    }
+
+
+    /***
+     *
+     * @param symbols   Ex SBIN.NS , For multiple shares SBIN.NS,TTM
+     * @param listener  OnShareGetListener to get the details in Objects of Share through ArrayList.
+     */
+    public static void getShareDetails(String symbols ,final OnShareGetListener listener)
+    {
+        ArrayList list = null;
+        final String url = "http://finance.yahoo.com/webservice/v1/symbols/"+symbols+"/quote?format=json&view=detail";
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    if(listener !=null)
+                        listener.onGetShareDetails(jsonToShareList(openUrl(url)));
+                    if(enableLog)
+                      Log.d(DEBUG_TAG, " Got got shares");
+
+                }
+                catch (Exception e)
+                {
+                    if(listener !=null)
+                        listener.onGetShareDetails(null);
+                    if(enableLog)
+                      Log.e(DEBUG_TAG , "error came::"+e);
+                }
+
+            }
+        });
+
+
+        thread.start();
+
+    }
+
+
+    /***
+     * @param symbol    Example SBIN.NS,TTM,etc.
+     * @param listener  Listener to get the details back.
+     */
+  public static void getNews(String symbol , final OnGetNewsListener listener)
+  {
+      final String  url = "http://pipes.yahoo.com/pipes/pipe.run?_id=2FV68p9G3BGVbc7IdLq02Q&_render=json&feedcount=10&feedurl=http://finance.yahoo.com/rss/headline?s="+symbol;
+      Thread thread = new Thread(new Runnable() {
+          @Override
+          public void run() {
+              try {
+                  if(listener != null)
+                      listener.onNewsAvailable(parseJsonToNews(openUrl(url)));
+              }
+              catch (Exception e)
+              {
+                  if(listener != null)
+                      listener.onNewsAvailable(null);
+              }
+
+          }
+      });
+      thread.start();
+  }
+
+
+    private static ArrayList<News> parseJsonToNews(String jsonString) throws JSONException
+    {
+        ArrayList newsList = null;
+        JSONObject jsonNewsObject = new JSONObject(jsonString);
+        JSONArray jsonArray         = jsonNewsObject.getJSONObject("value").getJSONArray("items");
+        int length = jsonArray.length();
+        newsList = new ArrayList(length);
+        for(int i=0 ; i<length ; i++)
+        {
+            JSONObject object = jsonArray.getJSONObject(i);
+         newsList.add(new News(object.getString("title"),object.getString("link"),object.getString("pubDate")));
+        }
+        return newsList;
+    }
 
 }
