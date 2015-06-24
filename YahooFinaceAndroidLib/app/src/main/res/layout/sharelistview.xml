@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+<TextView
+    android:id="@+id/shareSymbol"
+    android:layout_width="wrap_content"
+    android:text="TTM"
+    android:textSize="20sp"
+    android:textStyle="bold"
+    android:layout_marginLeft="5dp"
+    android:layout_marginTop="5dp"
+    android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/shareName"
+        android:layout_width="wrap_content"
+        android:text="Tata Motors"
+        android:textSize="15sp"
+        android:textStyle="bold"
+        android:layout_marginLeft="5dp"
+        android:layout_marginTop="5dp"
+        android:layout_below="@+id/shareSymbol"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/sharePrice"
+        android:layout_width="wrap_content"
+        android:text="100"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:layout_marginRight="15dp"
+        android:layout_marginTop="5dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true" />
+
+    <TextView
+        android:id="@+id/shareChange"
+        android:layout_width="wrap_content"
+        android:text="2"
+        android:textSize="15sp"
+        android:textStyle="bold"
+        android:layout_marginRight="15dp"
+        android:layout_marginTop="5dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/sharePrice"
+         />
+
+
+</RelativeLayout>

@@ -1,39 +1,44 @@
 package com.sirimobileapps.yahoofinaceandroidlib.test;
 
 import android.app.Activity;
-import android.app.IntentService;
 import android.content.Intent;
 import android.os.Bundle;
 
-import android.os.Debug;
 import android.util.Log;
 import android.view.View;
-import android.widget.ArrayAdapter;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
 
 import com.sirimobileapps.yahoofinaceandroidlib.R;
 import com.sirimobileapps.yahoofinacelib.classes.CompanySymbol;
 import com.sirimobileapps.yahoofinacelib.classes.Share;
-import com.sirimobileapps.yahoofinacelib.interfaces.OnCompanySymbolListener;
 import com.sirimobileapps.yahoofinacelib.interfaces.OnShareGetListener;
 import com.sirimobileapps.yahoofinacelib.utils.Utils;
 import com.sirimobileapps.yahoofinacelib.view.EditDropBox;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  * Created by smart on 5/6/15.
  */
-public class TestActivity extends Activity {
+public class TestActivity extends Activity implements View.OnClickListener , OnShareGetListener ,AdapterView.OnItemClickListener {
 
      String TAG = "TestActivity";
+    public final static String SHARE_HASHMAP_KEY = "SHARE_HASHMAP_KEY" ;
+    EditDropBox mSymbolSearchView = null;
 
-    String items[] = {"siva","phani","srikrishna"};
+    Button mAddShare = null;
 
-    EditDropBox mEditDropBox = null;
-    Button mButton = null;
-    ListView mView = null;
+    ListView mMyShareListView = null;
+
+    ArrayList<Share> mMyShareList = new ArrayList();
+
+    ArrayList<String> mMyShareSymbols = new ArrayList<String>();
+
+    ShareListAdapter myShareListAdapter = null ;
+
 
     protected void onCreate(Bundle savedInstance)
     {
@@ -42,24 +47,75 @@ public class TestActivity extends Activity {
         Log.d(TAG, "oncreate");
 
         setContentView(R.layout.testlayout);
-        mEditDropBox = (EditDropBox)(findViewById(R.id.editText));
+        mSymbolSearchView = (EditDropBox)(findViewById(R.id.searchView));
 
-        mView = (ListView)(findViewById(R.id.listView));
+        mMyShareListView = (ListView)(findViewById(R.id.listView));
 
-        mButton = (Button)(findViewById(R.id.addButton));
+        mAddShare = (Button)(findViewById(R.id.addButton));
 
-        mButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-              //  mEditDropBox.enableListView();
-                mView.setAdapter(new ArrayAdapter<String>(TestActivity.this,android.R.layout.simple_list_item_1,items));
+        mSymbolSearchView.setAdapter(null);
 
-            }
-        });
+        mAddShare.setOnClickListener(this);
+
+        myShareListAdapter = new ShareListAdapter(this,0,mMyShareList);
+
+        mMyShareListView.setAdapter(myShareListAdapter);
+        mMyShareListView.setOnItemClickListener(this);
 
     }
 
 
+    @Override
+    public void onClick(View v) {
+        String newSymbol = mSymbolSearchView.getText().toString();
+        if(mMyShareSymbols != null && !isSymbolExist(mMyShareSymbols ,newSymbol)) {
+
+            Utils.getShareDetails(newSymbol, this);
+        }
+    }
+
+    public boolean isSymbolExist(ArrayList<String> list , String newSymbol)
+    {
+        for(String string : list)
+        {
+            if(string.equalsIgnoreCase(newSymbol))
+                return true;
+        }
+        return false;
+    }
 
 
+    @Override
+    public void onGetShareDetails(ArrayList<Share> list , String symbolString) {
+        if(list != null) {
+            String symbols [] = symbolString.split(",");
+            for(int i = 0 ; i < symbols.length ; i++)
+            {
+                mMyShareSymbols.add(symbols[i]);
+            }
+            mMyShareList.addAll(list);
+            myShareListAdapter.setData(mMyShareList);
+            mMyShareListView.post(new Runnable() {
+                @Override
+                public void run() {
+                    myShareListAdapter.notifyDataSetChanged();
+                }
+            });
+
+        }
+
+    }
+
+    @Override
+    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+        HashMap hashMap = new HashMap(1);
+
+        Share share = mMyShareList.get(position);
+        Log.d(TAG ,"hashMap::"+share);
+        hashMap.put(share, "data");
+
+        Intent intent = new Intent(this , ShareDetailActivity.class);
+        intent.putExtra("data",share);
+        startActivity(intent);
+    }
 }

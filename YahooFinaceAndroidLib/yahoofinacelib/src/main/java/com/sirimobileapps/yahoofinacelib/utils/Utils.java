@@ -36,7 +36,7 @@ public  class Utils {
 
     private static String YAHOO_RESULT_STRING = "YAHOO.Finance.SymbolSuggest.ssCallback(";
 
-    private static boolean enableLog = false;
+    private static boolean enableLog = true;
 
     /**
      *
@@ -173,7 +173,7 @@ public  class Utils {
 
 
 
-    private  static ArrayList jsonToShareList(String jsonString) throws JSONException
+    private  static ArrayList jsonToShareList(String jsonString , String symbolString) throws JSONException
     {
         if(enableLog)
            Log.d(DEBUG_TAG , "jsonToShareList::"+jsonString);
@@ -186,13 +186,15 @@ public  class Utils {
 
         int length = jsonSymbolArray.length();
 
+        String symbols[] = symbolString.split(",");
+
 
         ArrayList list = new ArrayList(length);
 
         for(int i = 0 ; i < length ; i++)
         {
             JSONObject object = jsonSymbolArray.getJSONObject(i).getJSONObject("resource").getJSONObject("fields");
-            Share share = new Share(object.getString("change"),object.getString("chg_percent"),object.getString("day_high"),object.getString("day_low"),object.getString("name"),object.getString("price"),object.getString("volume"),object.getString("year_high"),object.getString("year_low"));
+            Share share = new Share(symbols[i],object.getString("change"),object.getString("chg_percent"),object.getString("day_high"),object.getString("day_low"),object.getString("name"),object.getString("price"),object.getString("volume"),object.getString("year_high"),object.getString("year_low"));
             list.add(share);
         }
 
@@ -205,7 +207,7 @@ public  class Utils {
      * @param symbols   Ex SBIN.NS , For multiple shares SBIN.NS,TTM
      * @param listener  OnShareGetListener to get the details in Objects of Share through ArrayList.
      */
-    public static void getShareDetails(String symbols ,final OnShareGetListener listener)
+    public static void getShareDetails(final String symbols ,final OnShareGetListener listener)
     {
         ArrayList list = null;
         final String url = "http://finance.yahoo.com/webservice/v1/symbols/"+symbols+"/quote?format=json&view=detail";
@@ -214,7 +216,7 @@ public  class Utils {
             public void run() {
                 try {
                     if(listener !=null)
-                        listener.onGetShareDetails(jsonToShareList(openUrl(url)));
+                        listener.onGetShareDetails(jsonToShareList(openUrl(url),symbols),symbols);
                     if(enableLog)
                       Log.d(DEBUG_TAG, " Got got shares");
 
@@ -222,7 +224,7 @@ public  class Utils {
                 catch (Exception e)
                 {
                     if(listener !=null)
-                        listener.onGetShareDetails(null);
+                        listener.onGetShareDetails(null,symbols);
                     if(enableLog)
                       Log.e(DEBUG_TAG , "error came::"+e);
                 }
@@ -249,9 +251,11 @@ public  class Utils {
               try {
                   if(listener != null)
                       listener.onNewsAvailable(parseJsonToNews(openUrl(url)));
+
               }
               catch (Exception e)
               {
+                  Log.e(DEBUG_TAG ,"Error Came "+e);
                   if(listener != null)
                       listener.onNewsAvailable(null);
               }
@@ -266,14 +270,19 @@ public  class Utils {
     {
         ArrayList newsList = null;
         JSONObject jsonNewsObject = new JSONObject(jsonString);
+        Log.d(DEBUG_TAG , "newsjon"+jsonString);
         JSONArray jsonArray         = jsonNewsObject.getJSONObject("value").getJSONArray("items");
         int length = jsonArray.length();
         newsList = new ArrayList(length);
         for(int i=0 ; i<length ; i++)
         {
             JSONObject object = jsonArray.getJSONObject(i);
-         newsList.add(new News(object.getString("title"),object.getString("link"),object.getString("pubDate")));
+            News news = new News(object.getString("title"),object.getString("link"),object.getString("pubDate"));
+
+            Log.d(DEBUG_TAG , "news::"+news);
+         newsList.add(news);
         }
+        Log.d(DEBUG_TAG , "newsList::"+newsList);
         return newsList;
     }
 

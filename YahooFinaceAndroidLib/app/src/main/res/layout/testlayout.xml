@@ -2,31 +2,33 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:custom="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
+    android:descendantFocusability="beforeDescendants"
+    android:focusableInTouchMode="true"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-<com.sirimobileapps.yahoofinacelib.view.EditDropBox
-    android:layout_width="fill_parent"
-    android:layout_height="wrap_content"
-    custom:hint="Enter Company Name"
-    android:id="@+id/editText"
-    >
 
-</com.sirimobileapps.yahoofinacelib.view.EditDropBox>
+
+<com.sirimobileapps.yahoofinacelib.view.EditDropBox
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:hint="Enter Company name"
+    android:id="@+id/searchView"
+    />
 
 
 <Button
     android:layout_width="wrap_content"
     android:text="Add"
     android:id="@+id/addButton"
-    android:layout_alignRight="@+id/editText"
+    android:layout_alignRight="@+id/searchView"
     android:layout_height="wrap_content" />
 
     <ListView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/listView"
-        android:layout_below="@+id/editText"
+        android:layout_below="@+id/searchView"
          />
 
 

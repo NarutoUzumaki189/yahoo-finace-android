@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent" android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/title"
+        android:focusableInTouchMode="true"
+        android:layout_width="fill_parent"
+        android:ellipsize="marquee"
+        android:marqueeRepeatLimit="marquee_forever"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:singleLine="true"
+        android:focusable="true"
+        android:text="Title is big so i need to marquee , please marquee so that i can work peacefully"
+        android:layout_height="wrap_content" />
+    <TextView
+        android:id="@+id/date"
+        android:text="10/60/2015"
+        android:textSize="18sp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:singleLine="true"
+        />
+    <TextView
+        android:id="@+id/link"
+        android:textSize="15sp"
+        android:text="http:://www.yahoo.com"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:singleLine="true"/>
+
+</LinearLayout>

@@ -3,5 +3,7 @@
     <declare-styleable name="EditDropBox">
         <attr name="Text" format="string" />
         <attr name="hint" format="string" />
+        <attr name="searchBoxId" format="reference" />
+        <attr name="displayBoxId" format="reference" />
     </declare-styleable>
 </resources>
